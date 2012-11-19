@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dendwrite - A Multithreaded Chat Interface</title>
+        <link href='/index.css' rel='stylesheet'/>
+        <script type="text/javascript" charset="utf-8" src="libs/jquery.min.js"></script>
+        <script src='/socket.io/socket.io.js'></script>
+        <script src='/index.js'></script>
+    </head>
+    <body>
+        <div id="nicknames"></div>
+        <div class="logo cf">
+            <h1 class="logoForegroundBranch">Dend</h1><h1 class="logoBackgroundBranch">W</h1><h1 class="logoTrunk">rite</h1>
+        </div>
+        <div id="nickname">
+            <form class="wrap" id="set-nickname" action="">
+                <label for="nick">What would you like to be called during this conversation?</label>
+                <input id="nick" name="nick" type="text" placeholder="nickname" />
+                <p id="nickname-err">Nickname already in use.</p>
+            </form>
+        </div>
+        <div id="connecting">
+            <div class="wrap">Seeking the mothership...&hellip;</div>
+        </div>
+        <div id="conversationWrapper">
+            <div id="threadWrapper">
+                <div id="messages">
+                </div>
+                <div id="send-message">
+                    <div class="mirror"></div>
+                    <div id="inputCursorFlash"></div>
+                    <textarea id="message"></textarea>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
