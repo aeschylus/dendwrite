@@ -18,10 +18,18 @@
 
   io.sockets.on('connection', function (socket) {
 
+
+      /*
+       * Every time "enter" is pressed (see bind events)
+       */
     socket.on('user message', function (msg) { 
         console.log('MESSAGE SENT');
       socket.broadcast.emit('user message', socket.nickname, msg);
     });
+
+      /*
+       * Keyup event
+       */
     socket.on('user typing', function (msg) { 
         console.log('TYPING');
       socket.broadcast.emit('user typing', socket.nickname, msg);

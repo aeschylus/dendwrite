@@ -1,26 +1,59 @@
+
+/**
+ * TODO + Bugs:
+ * - if usr types then deletes and msg.length == 0, remove 'is typing' txt
+ * - if the usr types words too long, things break (fix: hyphenation)
+ * - if you press enter with no text, your name appears x times on line
+ * - site susceptible for XSS (sanitize input)
+ */
+
 function craftingResponse(from, msg) {
     console.log('msg: '+msg);
+
     var typingState = {
         typing : from + " is crafting a response.",
-        waiting : from + " is sitting on a message."
+        waiting : from + " is sitting on a message." // TODO
     };
 
+    /**
+     * setCharAt 
+     * @param {String} str - 
+     * @param {Number} index - position o
+     * 
+     */
     function setCharAt(str,index,chr) {
         if(index > str.length-1) return str;
         return str.substr(0,index) + chr + str.substr(index+1);
     };
 
-    var length = msg.length;
-    for (x=0; x<length; x++) {
-        if (msg[x] === ' ' || msg[x] === '.' || msg[x] === ',' || msg[x] === '!' || msg[x] === '?') {
-            msg = setCharAt( msg, x, msg[x]);
-        } else {
-            msg = setCharAt( msg, x, "n" ); 
-        }
-    };
+
+    /**
+     * When a client types, all other clients will see garbled text
+     * - spaces, commas, and other punctuation should appear as plaintext
+     *
+     * This doesn't apply to the person who is actually typing
+     *
+     */
+    function composeMessage(msg) {    
+	// Find the current length of the typing client's message
+	var length = msg.length;
+	for (x=0; x<length; x++) {
+            if (msg[x] === ' ' || msg[x] === '.' || msg[x] === ',' || msg[x] === '!' || msg[x] === '?') {
+		msg = setCharAt( msg, x, msg[x]);
+            } else {
+		msg = setCharAt( msg, x, "n" ); 
+            }
+	};
+	return msg
+    }
+    composeMessage(msg);
+
+    // function showGarbledText() {
 
     typingState = typingState.typing;
     typingContainer = '<div class="message typing ' + from + '">'
+
+    // if incoming message container (blue garbling) doesn't exist...
     if (!$('.typing')[0]) {
         $('#messages').append(
             $(typingContainer).append(
@@ -40,7 +73,28 @@ function craftingResponse(from, msg) {
 
 };
 
+function suburls(msg) {
+    var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+    return msg.replace(exp,"<a href='$1'>$1</a>"); 
+}
+
+
+/**
+ * Add algo to perform entity tagging
+ */
+function subtags(msg) {
+    return msg;
+}
+
+/**
+ * Display the message to all clients 
+ */
+function preprocess(msg) {
+    return subtags(suburls(msg));
+}
+
 function message (from, msg) {
+    msg = preprocess(msg);
     if ( from === 'You' ) {
         $('#messages').append($('<div class="message you">').append($('<h3 class="sender">').text(from), $('<blockquote>').append('<p>'+msg+'</p>')));
     } else {
@@ -94,6 +148,7 @@ function message (from, msg) {
                 this.$input = $('#send-message textarea');
                 this.$incoming = $('.incomingCursorFlash');
             },
+
             bindEvents : function(){
                 //
                 // socket.io code
@@ -116,7 +171,10 @@ function message (from, msg) {
                     }
                 });
 
+		// sends (message func)
                 socket.on('user message', message);
+
+		// sends value of textarea (craftingResponse func)
                 socket.on('user typing', craftingResponse);
 
                 socket.on('reconnect', function () {
